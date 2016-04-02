@@ -1,5 +1,5 @@
-# Robin-Assistant
-Robin-Assistant is a neat userscript for [reddit robin](https://www.reddit.com/robin/) adding features such as:
+# Robin-AssistantX
+Robin-AssistantX is a neat userscript for [reddit robin](https://www.reddit.com/robin/) adding features such as:
 
 ## Features
 
@@ -36,3 +36,4 @@ Next open this [raw url](https://github.com/Cealor/Robin-AssistantX/raw/master/r
 * Add ratelimit counter
 * Add single-user mute
 * Limit vote count polling (especially important in bigger rooms)
+* All-Time Stats
