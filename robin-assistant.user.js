@@ -10,7 +10,7 @@
 // @grant   GM_getValue
 // @grant   GM_setValue
 // ==/UserScript==
-var version = "1.10";
+var version = "1.3";
 var autoVote = true;
 var disableVoteMsgs = true;
 var filterSpam = true;
