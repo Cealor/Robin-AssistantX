@@ -23,6 +23,12 @@ Opera has built-in userscript support
 
 Next open this [raw url](https://github.com/LeoVerto/Robin-Assistant/raw/master/robin-assistant.user.js) of the script and you should get an installation popup.
 
+# Changelog
+    1.3: First stage merging with /Cealor/robin-script complete
+    1.2: Initial updates
+    1.1: Initial fork
+
+
 ## Planned
 
 * Add time left counter
