@@ -3,14 +3,14 @@
 // @description Growth in peace
 // @namespace   com.github.Cealor
 // @include     https://www.reddit.com/robin*
-// @version     1.3
+// @version     1.4
 // @author      LeoVerto, Wiiplay123, Getnamo, K2L8M11N2, Cealor
 // @updateURL   https://github.com/Cealor/Robin-AssistantX/raw/master/robin-assistant.user.js
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @grant   GM_getValue
 // @grant   GM_setValue
 // ==/UserScript==
-var version = "1.3";
+var version = "1.4";
 var autoVote = true;
 var disableVoteMsgs = true;
 var filterSpam = true;
@@ -18,6 +18,20 @@ var filterNonAscii = true;
 
 $("#robinVoteWidget").append('<div class="addon"><div class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer;" id="openBtn">Open Settings</div></div>'); // Open Settings
 $(".robin-chat--sidebar").before('<div class="robin-chat--sidebar" style="display:none;" id="settingContainer"><div class="robin-chat--sidebar-widget robin-chat--vote-widget" id="settingContent"></div></div>'); // Setting container
+
+$("#robinVoteWidget").prepend("<div class='addon'><div class='usercount robin-chat--vote' style='font-weight:bold;pointer-events:none;'></div></div>");
+$("#robinVoteWidget").prepend("<div class='addon'><div class='timeleft robin-chat--vote' style='font-weight:bold;pointer-events:none;'></div></div>");
+$('.robin-chat--buttons').prepend("<div class='robin-chat--vote robin--vote-class--novote'><span class='robin--icon'></span><div class='robin-chat--vote-label'></div></div>");
+$('#robinVoteWidget .robin-chat--vote').css('padding', '5px');
+$('.robin--vote-class--novote').css('pointer-events', 'none');
+
+
+
+
+function hasChannel(source, channel) {
+    channel = String(channel).toLowerCase();
+    return String(source).toLowerCase().startsWith(channel);
+}
 
 function openSettings() {
     $(".robin-chat--sidebar").hide();
@@ -78,15 +92,55 @@ function addInputSetting(name, description, defaultSetting) {
 }
 
 // Options begin
-addBoolSetting("autoVote", "Automatically vote for grow", true);
-addBoolSetting("filterSpam", "Filter known spam", true);
-addBoolSetting("disableVoteMsgs", "Filter Vote messages", true);
-addBoolSetting("filterNonAscii", "Filter after blacklist", true);
+//addBoolSetting("autoVote", "Automatically vote for grow", true);
+//addBoolSetting("filterSpam", "Filter known spam", true);
+//addBoolSetting("disableVoteMsgs", "Filter Vote messages", true);
+//addBoolSetting("filterNonAscii", "Filter after blacklist", true);
 
 addInputSetting("channel", "Channel filter", "");
 
 // Options end
 $("#settingContent").append('<div class="robin-chat--sidebar-widget robin-chat--report" style="text-align:center;"><a target="_blank" href="https://github.com/Cealor/Robin-AssistantX">Robin-AssistantX - Version ' + version + '</a></div>');
+
+
+
+
+
+
+
+
+
+
+
+// Notifications
+var notif = new Audio("https://slack.global.ssl.fastly.net/dfc0/sounds/push/knock_brush.mp3");
+
+var currentUsersName = $('div#header span.user a').html();
+
+$('#robinChatMessageList').on('DOMNodeInserted', function (e) {
+    if ($(e.target).is('.robin--message-class--message.robin--user-class--user')) {
+        console.log("got new message");
+        if ($(".robin--message-class--message.robin--user-class--user").last().is(':contains("'+currentUsersName+'")')) {
+            $(".robin--message-class--message.robin--user-class--user").last().css("background","orangered").css("color","white");
+            notif.play();
+            console.log("got new mention");
+        }
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -121,6 +175,37 @@ $('<style>.robin--user-class--self { background: #F5F5F5; } .robin--user-class--
 $("#robinSendMessage").append('<div onclick={$(".text-counter-input").submit();} class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer; margin-left:0;" id="sendBtn">Send Message</div>'); // Send message
 $('#robinChatInput').css('background', '#EFEFED');
 
+
+var users = 0;
+$.get("/robin/", function(a) {
+    var start = "{" + a.substring(a.indexOf("\"robin_user_list\": ["));
+    var end = start.substring(0, start.indexOf("}]") + 2) + "}";
+    list = JSON.parse(end).robin_user_list;
+    var increaseCount = list.filter(function(voter) {
+        return voter.vote === "INCREASE";
+    }).length;
+    var abandonCount = list.filter(function(voter) {
+        return voter.vote === "ABANDON";
+    }).length;
+    var novoteCount = list.filter(function(voter) {
+        return voter.vote === "NOVOTE";
+    }).length;
+    var continueCount = list.filter(function(voter) {
+        return voter.vote === "CONTINUE";
+    }).length;
+    $('#robinVoteWidget .robin--vote-class--increase .robin-chat--vote-label').html('grow<br>(' + formatNumber(increaseCount) + ')');
+    $('#robinVoteWidget .robin--vote-class--abandon .robin-chat--vote-label').html('abandon<br>(' + formatNumber(abandonCount) + ')');
+    $('#robinVoteWidget .robin--vote-class--novote .robin-chat--vote-label').html('no vote<br>(' + formatNumber(novoteCount) + ')');
+    $('#robinVoteWidget .robin--vote-class--continue .robin-chat--vote-label').html('stay<br>(' + formatNumber(continueCount) + ')');
+    users = list.length;
+    $(".usercount").text(formatNumber(users) + " users in chat");
+});
+var lastChatString = $(".robin-message--timestamp").last().attr("datetime");
+var timeSinceLastChat = new Date() - (new Date(lastChatString));
+var now = new Date();
+if (timeSinceLastChat !== undefined && (timeSinceLastChat > 60000 && now - timeStarted > 60000)) {
+    window.location.reload(); // reload if we haven't seen any activity in a minute.
+}
 
 
 var ownName = $('.user a').text();
@@ -191,8 +276,7 @@ function addOptions() {
   customOptions.className =
     "robin-chat--sidebar-widget robin-chat--notification-widget";
 
-  var header = "<b style=\"font-size: 14px;\">Robin-Assistant " + version +
-    " Configuration</b>"
+  var header = "<b style=\"font-size: 14px;\">Settings</b>"
 
   var autoVoteOption = createCheckbox("auto-vote",
     "Automatically vote Grow", autoVote, autoVoteListener, false);
@@ -408,10 +492,17 @@ function updateVotes() {
       vote.action = "No majority";
     }
   });
-
+    
   votesLastUpdated = Date.now();
   return true;
 }
+
+$('#robinVoteWidget .robin--vote-class--increase .robin-chat--vote-label').html('grow<br>(' + votes.grow + ')');
+$('#robinVoteWidget .robin--vote-class--abandon .robin-chat--vote-label').html('abandon<br>(' + votes.abandon + ')');
+$('#robinVoteWidget .robin--vote-class--novote .robin-chat--vote-label').html('no vote<br>(' + votes.abstain + ')');
+$('#robinVoteWidget .robin--vote-class--continue .robin-chat--vote-label').html('stay<br>(' + votes.stay + ')');
+$(".usercount").html('' + userCount + ' users in chat');
+
 
 // Mutation observer for new messages
 var observer = new MutationObserver(function(mutations) {
@@ -460,7 +551,7 @@ observer.observe($("#robinChatMessageList").get(0), {
 });
 
 // Main run
-console.log("Robin-Assistant " + version + " enabled!");
+console.log("Robin-AssistantX " + version + " enabled!");
 
 rewriteCSS();
 addOptions();
