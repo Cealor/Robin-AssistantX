@@ -19,8 +19,10 @@ var filterNonAscii = true;
 $("#robinVoteWidget").append('<div class="addon"><div class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer;" id="openBtn">Open Settings</div></div>'); // Open Settings
 $(".robin-chat--sidebar").before('<div class="robin-chat--sidebar" style="display:none;" id="settingContainer"><div class="robin-chat--sidebar-widget robin-chat--vote-widget" id="settingContent"></div></div>'); // Setting container
 
+$("#robinVoteWidget").prepend("<div class='addon'><div class='nextround robin-chat--vote' style='font-weight:bold;pointer-events:none;'></div></div>");
 $("#robinVoteWidget").prepend("<div class='addon'><div class='usercount robin-chat--vote' style='font-weight:bold;pointer-events:none;'></div></div>");
 $("#robinVoteWidget").prepend("<div class='addon'><div class='timeleft robin-chat--vote' style='font-weight:bold;pointer-events:none;'></div></div>");
+
 $('.robin-chat--buttons').prepend("<div class='robin-chat--vote robin--vote-class--novote'><span class='robin--icon'></span><div class='robin-chat--vote-label'></div></div>");
 $('#robinVoteWidget .robin-chat--vote').css('padding', '5px');
 $('.robin--vote-class--novote').css('pointer-events', 'none');
@@ -176,36 +178,6 @@ $("#robinSendMessage").append('<div onclick={$(".text-counter-input").submit();}
 $('#robinChatInput').css('background', '#EFEFED');
 
 
-var users = 0;
-$.get("/robin/", function(a) {
-    var start = "{" + a.substring(a.indexOf("\"robin_user_list\": ["));
-    var end = start.substring(0, start.indexOf("}]") + 2) + "}";
-    list = JSON.parse(end).robin_user_list;
-    var increaseCount = list.filter(function(voter) {
-        return voter.vote === "INCREASE";
-    }).length;
-    var abandonCount = list.filter(function(voter) {
-        return voter.vote === "ABANDON";
-    }).length;
-    var novoteCount = list.filter(function(voter) {
-        return voter.vote === "NOVOTE";
-    }).length;
-    var continueCount = list.filter(function(voter) {
-        return voter.vote === "CONTINUE";
-    }).length;
-    $('#robinVoteWidget .robin--vote-class--increase .robin-chat--vote-label').html('grow<br>(' + formatNumber(increaseCount) + ')');
-    $('#robinVoteWidget .robin--vote-class--abandon .robin-chat--vote-label').html('abandon<br>(' + formatNumber(abandonCount) + ')');
-    $('#robinVoteWidget .robin--vote-class--novote .robin-chat--vote-label').html('no vote<br>(' + formatNumber(novoteCount) + ')');
-    $('#robinVoteWidget .robin--vote-class--continue .robin-chat--vote-label').html('stay<br>(' + formatNumber(continueCount) + ')');
-    users = list.length;
-    $(".usercount").text(formatNumber(users) + " users in chat");
-});
-var lastChatString = $(".robin-message--timestamp").last().attr("datetime");
-var timeSinceLastChat = new Date() - (new Date(lastChatString));
-var now = new Date();
-if (timeSinceLastChat !== undefined && (timeSinceLastChat > 60000 && now - timeStarted > 60000)) {
-    window.location.reload(); // reload if we haven't seen any activity in a minute.
-}
 
 
 var ownName = $('.user a').text();
@@ -250,7 +222,7 @@ var spamBlacklist = ["spam the most used",
   "spam the most used phrase", "moob hunter", "someone in chat annoying",
   "cool ppl list", "can't beat me", "smexy", "my ruler", "bean",
   "current standings", "numbers & tits", "numbers and tits", "nigglets",
-  "voting will end"
+  "voting will end",
 ];
 
 var nonEnglishSpamRegex = "[^\x00-\x7F]+";
@@ -265,6 +237,8 @@ function sendMessage(msg) {
   $(".text-counter-input")[0].value = msg;
   $(".text-counter-input")[0].nextSibling.click();
 }
+
+
 
 // Custom options
 function addOptions() {
@@ -377,6 +351,7 @@ function howLongLeft() { // mostly from /u/Yantrio
   var soonMessageArray = $(".robin-message--message:contains('soon')");
   if (soonMessageArray.length > 0) {
     // for cases where it says "soon" instead of a time on page load
+    var timeLeft = "Soon";
     return "Soon";
   }
 
@@ -397,6 +372,7 @@ function howLongLeft() { // mostly from /u/Yantrio
     var min = Math.floor(fraction);
     var sec = Math.round((fraction - min) * 60);
     return min + " m " + sec + " s";
+      var timeLeft = min + " m " + sec + " s";
   } catch (e) {
     return "Fail";
   }
@@ -441,7 +417,6 @@ function checkSpam(message) {
 // Generic updates
 function update() {
   updateCounter("time-left", howLongLeft());
-
   // update vote counters
   updateCounter("vote-grow", votes.grow);
   updateCounter("vote-stay", votes.stay);
@@ -454,10 +429,12 @@ function update() {
   updateCounter("next-action", "Next round we will " + votes.action);
 }
 
+
+
 // Triggered whenever someone votes
 function updateVotes() {
-  // Cancel if updated during last 10 seconds
-  if (Date.now() - votesLastUpdated < 10000) {
+  // Cancel if updated during last 5 seconds
+  if (Date.now() - votesLastUpdated < 5000) {
     return false;
   }
 
@@ -491,18 +468,21 @@ function updateVotes() {
     } else {
       vote.action = "No majority";
     }
+      $('#robinVoteWidget .robin--vote-class--increase .robin-chat--vote-label').html('grow<br>(' + votes.grow + ')');
+      $('#robinVoteWidget .robin--vote-class--abandon .robin-chat--vote-label').html('abandon<br>(' + votes.abandon + ')');
+      $('#robinVoteWidget .robin--vote-class--novote .robin-chat--vote-label').html('no vote<br>(' + votes.abstain + ')');
+      $('#robinVoteWidget .robin--vote-class--continue .robin-chat--vote-label').html('stay<br>(' + votes.stay + ')');
+      $(".usercount").html('' + userCount + ' users in chat');
+      $(".timeleft").html('' + howLongLeft() + '');
+      $(".nextround").append(nextAction);
+      //<br><span style=\"font-size: 14px;\">Users here: <span id=\"user-count\">0</span></span>
+      //<br><span style=\"font-size: 14px;\">Time Left: <span id=\"time-left\">0</span></span>
+      
   });
     
   votesLastUpdated = Date.now();
   return true;
 }
-
-$('#robinVoteWidget .robin--vote-class--increase .robin-chat--vote-label').html('grow<br>(' + votes.grow + ')');
-$('#robinVoteWidget .robin--vote-class--abandon .robin-chat--vote-label').html('abandon<br>(' + votes.abandon + ')');
-$('#robinVoteWidget .robin--vote-class--novote .robin-chat--vote-label').html('no vote<br>(' + votes.abstain + ')');
-$('#robinVoteWidget .robin--vote-class--continue .robin-chat--vote-label').html('stay<br>(' + votes.stay + ')');
-$(".usercount").html('' + userCount + ' users in chat');
-
 
 // Mutation observer for new messages
 var observer = new MutationObserver(function(mutations) {
