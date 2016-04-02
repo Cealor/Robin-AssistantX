@@ -11,69 +11,6 @@
 // @grant   GM_setValue
 // ==/UserScript==
 
-    function hasChannel(source, channel) {
-        channel = String(channel).toLowerCase();
-        return String(source).toLowerCase().startsWith(channel);
-    }
-
-    function openSettings() {
-        $(".robin-chat--sidebar").hide();
-        $("#settingContainer").show();
-    }
-    $("#openBtn").on("click", openSettings);
-
-    function closeSettings() {
-        $(".robin-chat--sidebar").show();
-        $("#settingContainer").hide();
-    }
-    $("#settingContent").append('<div class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer;" id="closeBtn">Close Settings</div>');
-    $("#closeBtn").on("click", closeSettings);
-    // Dom Setup end
-    function saveSetting(settings) {
-        localStorage["robin-grow-settings"] = JSON.stringify(settings);
-    }
-
-    function loadSetting() {
-        var setting = localStorage["robin-grow-settings"];
-        if (setting) {
-            setting = JSON.parse(setting);
-        } else {
-            setting = {};
-        }
-        return setting;
-    }
-
-    var settings = loadSetting();
-
-    function addBoolSetting(name, description, defaultSetting) {
-
-        defaultSetting = settings[name] || defaultSetting;
-
-        $("#settingContent").append('<div class="robin-chat--sidebar-widget robin-chat--notification-widget"><label><input type="checkbox" name="setting-' + name + '">' + description + '</label></div>');
-        $("input[name='setting-" + name + "']").on("click", function() {
-            settings[name] = !settings[name];
-            saveSetting(settings);
-        });
-        if (settings[name] !== undefined) {
-            $("input[name='setting-" + name + "']").prop("checked", settings[name]);
-        } else {
-            settings[name] = defaultSetting;
-        }
-    }
-
-    function addInputSetting(name, description, defaultSetting) {
-
-        defaultSetting = settings[name] || defaultSetting;
-
-        $("#settingContent").append('<div id="robinDesktopNotifier" class="robin-chat--sidebar-widget robin-chat--notification-widget"><label><input type="text" name="setting-' + name + '">' + description + '</label></div>');
-        $("input[name='setting-" + name + "']").prop("defaultValue", defaultSetting)
-            .on("change", function() {
-                settings[name] = $(this).val();
-                saveSetting(settings);
-            });
-        settings[name] = defaultSetting;
-    }
-}
 var autoVote = true;
 var disableVoteMsgs = true;
 var filterSpam = true;
