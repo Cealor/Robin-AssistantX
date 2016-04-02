@@ -3,13 +3,18 @@
 // @description Growth in peace
 // @namespace   com.github.Cealor
 // @include     https://www.reddit.com/robin*
-// @version     1.10
+// @version     1.3
 // @author      LeoVerto, Wiiplay123, Getnamo, K2L8M11N2, Cealor
-// @updateURL    https://github.com/Cealor/Robin-AssistantX/raw/master/robin-assistant.user.js
-// @require      http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
+// @updateURL   https://github.com/Cealor/Robin-AssistantX/raw/master/robin-assistant.user.js
+// @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @grant   GM_getValue
 // @grant   GM_setValue
 // ==/UserScript==
+var version = "1.10";
+var autoVote = true;
+var disableVoteMsgs = true;
+var filterSpam = true;
+var filterNonAscii = true;
 
 $("#robinVoteWidget").append('<div class="addon"><div class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer;" id="openBtn">Open Settings</div></div>'); // Open Settings
 $(".robin-chat--sidebar").before('<div class="robin-chat--sidebar" style="display:none;" id="settingContainer"><div class="robin-chat--sidebar-widget robin-chat--vote-widget" id="settingContent"></div></div>'); // Setting container
@@ -27,12 +32,96 @@ $("#settingContainer").hide();
 $("#settingContent").append('<div class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer;" id="closeBtn">Close Settings</div>');
 $("#closeBtn").on("click", closeSettings);
 
+function saveSetting(settings) {
+    localStorage["robin-grow-settings"] = JSON.stringify(settings);
+}
 
-var autoVote = true;
-var disableVoteMsgs = true;
-var filterSpam = true;
-var filterNonAscii = true;
-var version = "1.10";
+function loadSetting() {
+    var setting = localStorage["robin-grow-settings"];
+    if (setting) {
+        setting = JSON.parse(setting);
+} else {
+    setting = {};
+}
+    return setting;
+}
+
+var settings = loadSetting();
+
+function addBoolSetting(name, description, defaultSetting) {
+
+    defaultSetting = settings[name] || defaultSetting;
+
+    $("#settingContent").append('<div class="robin-chat--sidebar-widget robin-chat--notification-widget"><label><input type="checkbox" name="setting-' + name + '">' + description + '</label></div>');
+    $("input[name='setting-" + name + "']").on("click", function() {
+        settings[name] = !settings[name];
+        saveSetting(settings);
+    });
+    if (settings[name] !== undefined) {
+        $("input[name='setting-" + name + "']").prop("checked", settings[name]);
+    } else {
+        settings[name] = defaultSetting;
+    }
+}
+
+function addInputSetting(name, description, defaultSetting) {
+
+    defaultSetting = settings[name] || defaultSetting;
+
+    $("#settingContent").append('<div id="robinDesktopNotifier" class="robin-chat--sidebar-widget robin-chat--notification-widget"><label><input type="text" name="setting-' + name + '">' + description + '</label></div>');
+    $("input[name='setting-" + name + "']").prop("defaultValue", defaultSetting)
+        .on("change", function() {
+        settings[name] = $(this).val();
+        saveSetting(settings);
+    });
+    settings[name] = defaultSetting;
+}
+
+// Options begin
+addBoolSetting("autoVote", "Automatically vote for grow", true);
+addBoolSetting("filterSpam", "Filter known spam", true);
+addBoolSetting("disableVoteMsgs", "Filter Vote messages", true);
+addBoolSetting("filterNonAscii", "Filter after blacklist", true);
+
+addInputSetting("channel", "Channel filter", "");
+
+// Options end
+$("#settingContent").append('<div class="robin-chat--sidebar-widget robin-chat--report" style="text-align:center;"><a target="_blank" href="https://github.com/Cealor/Robin-AssistantX">Robin-AssistantX - Version ' + version + '</a></div>');
+
+
+
+var flairColor = [
+    '#e50000', // red
+    '#db8e00', // orange
+    '#ccc100', // yellow
+    '#02be01', // green
+    '#0083c7', // blue
+    '#820080'  // purple
+];
+
+function colorFromName(name) {
+    sanitizedName = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    flairNum = parseInt(sanitizedName, 36) % 6;
+    return flairColor[flairNum];
+}
+
+// Color names in user list
+$('#robinUserList .robin--username').each(function(){
+    $(this).css('color', colorFromName($(this).text()));
+});
+
+// Bold current user's name in user list
+$('#robinUserList .robin--user-class--self .robin--username').css('font-weight', 'bold');
+
+// Color current user's name in chat and darken post backgrounds
+var currentUserColor = colorFromName($('#robinUserList .robin--user-class--self .robin--username').text());
+$('<style>.robin--user-class--self { background: #F5F5F5; } .robin--user-class--self .robin--username { color: ' + currentUserColor + ' !important; font-weight: bold;}</style>').appendTo('body');
+
+// Send message button
+$("#robinSendMessage").append('<div onclick={$(".text-counter-input").submit();} class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer; margin-left:0;" id="sendBtn">Send Message</div>'); // Send message
+$('#robinChatInput').css('background', '#EFEFED');
+
+
 
 var ownName = $('.user a').text();
 var filteredSpamCount = 0;
