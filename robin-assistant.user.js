@@ -11,6 +11,23 @@
 // @grant   GM_setValue
 // ==/UserScript==
 
+$("#robinVoteWidget").append('<div class="addon"><div class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer;" id="openBtn">Open Settings</div></div>'); // Open Settings
+$(".robin-chat--sidebar").before('<div class="robin-chat--sidebar" style="display:none;" id="settingContainer"><div class="robin-chat--sidebar-widget robin-chat--vote-widget" id="settingContent"></div></div>'); // Setting container
+
+function openSettings() {
+    $(".robin-chat--sidebar").hide();
+    $("#settingContainer").show();
+}
+    $("#openBtn").on("click", openSettings);
+
+function closeSettings() {
+$(".robin-chat--sidebar").show();
+$("#settingContainer").hide();
+}
+$("#settingContent").append('<div class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer;" id="closeBtn">Close Settings</div>');
+$("#closeBtn").on("click", closeSettings);
+
+
 var autoVote = true;
 var disableVoteMsgs = true;
 var filterSpam = true;
