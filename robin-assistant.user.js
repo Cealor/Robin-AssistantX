@@ -555,8 +555,8 @@ setTimeout(function() {
 // Update every 3 seconds
 setInterval(function() {
   update();
-  // Update votes at least every 30 seconds
-  if (Date.now - votesLastUpdated > 30000) {
+  // Update votes at least every 5 seconds
+  if (Date.now - votesLastUpdated > 5000) {
     updateVotes();
   }
 }, 3000);
@@ -569,4 +569,4 @@ setInterval(function() {
       jQuery("#joinRobin").click();
     }, 1000);
   }
-}, 60000);
+}, 30000);
