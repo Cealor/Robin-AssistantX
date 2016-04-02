@@ -11,12 +11,6 @@
 // @grant   GM_setValue
 // ==/UserScript==
 
-(function() {
-    // Settings
-    // DOM Setup begin
-    $("#robinVoteWidget").append('<div class="addon"><div class="robin-chat--vote" style="font-weight: bold; padding: 5px;cursor: pointer;" id="openBtn">Open Settings</div></div>'); // Open Settings
-    $(".robin-chat--sidebar").before('<div class="robin-chat--sidebar" style="display:none;" id="settingContainer"><div class="robin-chat--sidebar-widget robin-chat--vote-widget" id="settingContent"></div></div>'); // Setting container
-
     function hasChannel(source, channel) {
         channel = String(channel).toLowerCase();
         return String(source).toLowerCase().startsWith(channel);
@@ -79,7 +73,7 @@
             });
         settings[name] = defaultSetting;
     }
-
+}
 var autoVote = true;
 var disableVoteMsgs = true;
 var filterSpam = true;
