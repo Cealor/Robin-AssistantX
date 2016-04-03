@@ -3,7 +3,7 @@ Robin Enhancement Suite is a neat userscript for [reddit robin](https://www.redd
 
 ## Features
 
-* **Advanced, configurable Spam filter**
+* **Advanced, configurable Spam filter***
 * Automatically vote for growth or stay
 * Single-User mute
 * **Displays user count, tally and current vote outcome**
@@ -12,6 +12,11 @@ Robin Enhancement Suite is a neat userscript for [reddit robin](https://www.redd
 * Highlight messages containing your name (thanks to /u/rlemon, who made [this](https://gist.github.com/rlemon/cc13cb4c31861e5d5ba2a92bfc920aeb) great script)
 * **Automatically try to rejoin, if kicked out of robin (again, thanks to /u/rlemon)**
 
+* *Posts are filtered after:
+  *  - a user and content blacklist
+  *  - bot messages
+  *  - containment of special characters, ASCII or CAPS
+  *  - channel (configurable)
 
 ## Installation
 
