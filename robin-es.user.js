@@ -5,7 +5,7 @@
 // @include     https://www.reddit.com/robin*
 // @version     1.8
 // @author      LeoVerto, Wiiplay123, Getnamo, K2L8M11N2, Cealor, vartan
-// @updateURL   https://github.com/Cealor/Robin-AssistantX/raw/master/robin-assistantx.user.js
+// @updateURL   https://github.com/Cealor/Robin-Enhancement-Suite/raw/master/robin-es.user.js
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @grant   GM_getValue
 // @grant   GM_setValue
@@ -105,7 +105,7 @@ addInputSetting("channel", "Channel filter", "");
 
 
 // Options end
-$("#settingContent").append('<div class="robin-chat--sidebar-widget robin-chat--report" style="text-align:center;"><a target="_blank" href="https://github.com/Cealor/Robin-AssistantX">Robin-AssistantX - Version ' + version + '</a></div>');
+$("#settingContent").append('<div class="robin-chat--sidebar-widget robin-chat--report" style="text-align:center;"><a target="_blank" href="https://github.com/Cealor/Robin-Enhancement-Suite/raw/master/robin-es.user.js">Robin Enhancement Suite - Version ' + version + '</a></div>');
 
 
 function filterMessages() {
@@ -700,7 +700,7 @@ observer.observe($("#robinChatMessageList").get(0), {
 });
 
 // Main run
-console.log("Robin-AssistantX " + version + " enabled!");
+console.log("Robin Enhancement Suite " + version + " enabled!");
 
 rewriteCSS();
 addOptions();
