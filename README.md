@@ -24,6 +24,8 @@ Opera has built-in userscript support
 Next open this [raw url](https://github.com/Cealor/Robin-AssistantX/raw/master/robin-assistant.user.js) of the script and you should get an installation popup.
 
 # Changelog
+    1.8  Advanced Spam filter added
+    1.5  UX Updated
     1.3: First stage merging with /Cealor/robin-script complete
     1.2: Initial updates
     1.1: Initial fork
@@ -31,7 +33,6 @@ Next open this [raw url](https://github.com/Cealor/Robin-AssistantX/raw/master/r
 
 ## Planned
 
-* Add time left counter
 * Use online spam blacklist
 * Add ratelimit counter
 * Add single-user mute
