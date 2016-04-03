@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        Robin AssistantX
+// @name        Robin Enhancement Suite
 // @description Growth in peace
 // @namespace   com.github.Cealor
 // @include     https://www.reddit.com/robin*
