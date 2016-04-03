@@ -5,6 +5,7 @@ Robin Enhancement Suite is a neat userscript for [reddit robin](https://www.redd
 
 * **Advanced Spam filter**
 * Automatically vote for growth
+* Single-User mute
 * Configuration options for everything!
 * **Chat and user list use the entire available site height**
 * Highlight messages containing your name (thanks to /u/rlemon, who made [this](https://gist.github.com/rlemon/cc13cb4c31861e5d5ba2a92bfc920aeb) great script)
@@ -34,6 +35,5 @@ Next open this [raw url](https://github.com/Cealor/Robin-Enhancement-Suite/raw/m
 
 * Use online spam blacklist
 * Add ratelimit counter
-* Add single-user mute
 * Limit vote count polling (especially important in bigger rooms)
 * All-Time Stats
