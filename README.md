@@ -1,5 +1,5 @@
-# Robin-AssistantX
-Robin-AssistantX is a neat userscript for [reddit robin](https://www.reddit.com/robin/) adding features such as:
+# Robin Enhancement Suite
+Robin Enhancement Suite is a neat userscript for [reddit robin](https://www.reddit.com/robin/) adding features such as:
 
 ## Features
 
@@ -21,7 +21,7 @@ The by far easiest way to install this script is by pasting it into your browser
 Install [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) for **Firefox** or [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) for **Chrome** to use this userscript.
 Opera has built-in userscript support
 
-Next open this [raw url](https://github.com/Cealor/Robin-AssistantX/raw/master/robin-assistant.user.js) of the script and you should get an installation popup.
+Next open this [raw url](https://github.com/Cealor/Robin-Enhancement-Suite/raw/master/robin-es.user.js) of the script and you should get an installation popup.
 
 # Changelog
     1.8  Advanced Spam filter added
