@@ -3,14 +3,21 @@
 // @description Growth in peace
 // @namespace   com.github.Cealor
 // @include     https://www.reddit.com/robin*
-// @version     1.8
+// @version     1.9
 // @author      LeoVerto, Wiiplay123, Getnamo, K2L8M11N2, Cealor, vartan
 // @updateURL   https://github.com/Cealor/Robin-Enhancement-Suite/raw/master/robin-es.user.js
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @grant   GM_getValue
 // @grant   GM_setValue
 // ==/UserScript==
-var version = "1.8";
+var version = "1.9";
+
+var userCount = 0;
+
+var percentNonWordCharactersAllowed = .25;
+var ratioUppercaseToLowercase = .25;
+
+var msgsDeleted = 0;
 
 var  autoVote = "grow";
 var  disableVoteMsgs = true;
@@ -59,11 +66,11 @@ $("#settingContent").append('<div class="robin-chat--vote" style="font-weight: b
 $("#closeBtn").on("click", closeSettings);
 
 function saveSetting(settings) {
-    localStorage["robinassistantx-settings"] = JSON.stringify(settings);
+    localStorage["robin-es-config"] = JSON.stringify(settings);
 }
 
 function loadSetting() {
-    var setting = localStorage["robinassistantx-settings"];
+    var setting = localStorage["robin-es-config"];
     if (setting) {
         setting = JSON.parse(setting);
 } else {
@@ -120,9 +127,55 @@ addInputSetting("channel", "Channel filter", "");
 // Options end
 $("#settingContent").append('<div class="robin-chat--sidebar-widget robin-chat--report" style="text-align:center;"><a target="_blank" href="https://github.com/Cealor/Robin-Enhancement-Suite/raw/master/robin-es.user.js">Robin Enhancement Suite - Version ' + version + '</a></div>');
 
+// This is the function that checks for ALL CAPS MESSAGES and poop emojis
+function isReal(s) {
+    var upperStr = s.replace(/[A-Z]/g, '')
+    var upper = s.length - upperStr.length;
+
+    var lowerStr = upperStr.replace(/[a-z]/g, '')
+    var lower = upperStr.length - lowerStr.length;
+
+    var nonWord = lowerStr.length;
+
+    // if the ratio of uppercase to lowercase letters is greater that .25, fail the message
+    if ((upper / lower) > ratioUppercaseToLowercase) {
+        //    console.log(upper + ' / ' + lower + ' / ' + nonWord + ' ratio is ' + upper / lower);
+        filteredSpamCount += 1;
+        updateCounter("filter-spam-counter", filteredSpamCount);
+        return false;
+    }
+
+    // if the percentage of non-word characters is larger than 25% then fail the message
+    if ((nonWord / s.length) > percentNonWordCharactersAllowed) {
+        //    console.log(upper + ' / ' + lower + ' / ' + nonWord + ' percentage is ' + nonWord / s.length);
+        filteredSpamCount += 1;
+        updateCounter("filter-spam-counter", filteredSpamCount);
+        return false;
+    }
+    return true;
+}   
+
+
+function removeCaps() {
+    $("#robinChatMessageList").bind("DOMSubtreeModified", function() {
+        var msgs = $('.robin-message--message');
+          //  console.log('number of msgs: ' + msgs.length + '/' + msgsDeleted);
+
+        for(var i = 0; i < msgs.length; i++) {
+            if (!isReal(msgs[i].innerText)) {
+                // allow the system messages to come through
+                if (!$(msgs[i]).parent().hasClass('robin--user-class--system')) {
+                    msgsDeleted++;
+                    $(msgs[i]).parent().remove();
+                }
+            }
+        }
+    });
+}
+
+
 
 function filterMessages() {
-
     $(".robin--user-class--user").filter(function(num, message) {
         var text = $(message).find(".robin-message--message").text();
 
@@ -242,6 +295,7 @@ function mutationHandler(mutationRecords) {
                     $(jq[0]).find('.robin-message--message').html(newHTML);
                 }
                 filterMessages();
+                removeCaps();
             }
         }
     });
@@ -305,7 +359,7 @@ function findAndHideSpam() {
             $.each(messages, function(hash, message) {
                 if (message.count >= 3) {
                     $.each(message.elements, function(index, element) {
-                        //console.log("SPAM REMOVE: "+$(element).closest('.robin-message').text())
+                        console.log("SPAM REMOVE: "+$(element).closest('.robin-message').text())
                         $(element).closest('.robin-message').addClass('addon--hide').remove();
                     });
                 } else {
@@ -364,11 +418,14 @@ $('#robinChatInput').css('background', '#EFEFED');
 
 
 
+
+
+
 var ownName = $('.user a').text();
 var filteredSpamCount = 0;
 var filteredVoteCount = 0;
 var filteredNonAsciiCount = 0;
-var userCount = 0;
+
 
 var votes = {
   grow: 0,
@@ -645,11 +702,11 @@ function closeSettings() {
 }
 
 function saveSetting(settings) {
-    localStorage["robinassistantx-settings"] = JSON.stringify(settings);
+    localStorage["robin-es-config"] = JSON.stringify(settings);
 }
 
 function loadSetting() {
-    var setting = localStorage["robinassistantx-settings"];
+    var setting = localStorage["robin-es-config"];
     if(setting) {
         setting = JSON.parse(setting);
     } else {
@@ -909,31 +966,36 @@ function fetchTimeIntervals() {
 }
 
 // Auto-grow
-//setTimeout(function() {
-//  if (autoVote) {
-//    $(".robin--vote-class--increase")[0].click();
-//    console.log("Voting grow!");
-//  }
-//}, 10000);
+setTimeout(function() {
+  if (autoVote) {
+    $(".robin--vote-class--increase")[0].click();
+    console.log("Voting grow!");
+  }
+}, 10000);
 
 setInterval(function() {
     filterMessages();
+    removeCaps();
 }, 1);
 
 
 setInterval(function() {
     $(".timeleft").html('' + howLongLeft() + '');
-}, 100);
+    update();
+    updateVotes();
+    $(".usercount").html('' + userCount + ' users in chat');
+}, 10);
 
 // Update every 3 seconds
-setInterval(function() {
-  update();
+//setInterval(function() {
+//  update();
   // Update votes at least every 30 seconds
-  if (Date.now - votesLastUpdated > 30000) {
-    updateVotes();
-    filterMessages();
-  }
-}, 3000);
+//  if (Date.now - votesLastUpdated > 30000) {
+//    updateVotes();
+//    filterMessages();
+//    removeCaps();
+//  }
+//}, 3000);
 
 // Try to join robin if not in a chat once a minute
 setInterval(function() {
