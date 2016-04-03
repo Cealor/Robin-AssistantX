@@ -3,15 +3,14 @@ Robin Enhancement Suite is a neat userscript for [reddit robin](https://www.redd
 
 ## Features
 
+* **Advanced Spam filter**
 * Automatically vote for growth
-* Filter vote messages
-* Filter common spam, repetition spam
 * Configuration options for everything!
-* Chat and user list use the entire available site height
+* **Chat and user list use the entire available site height**
 * Highlight messages containing your name (thanks to /u/rlemon, who made [this](https://gist.github.com/rlemon/cc13cb4c31861e5d5ba2a92bfc920aeb) great script)
 * Displays user count, tally and current vote outcome
 * Filter all messages containing non-ASCII characters
-* Automatically try to rejoin, if kicked out of robin (again, thanks to /u/rlemon)
+* **Automatically try to rejoin, if kicked out of robin (again, thanks to /u/rlemon)**
 
 
 ## Installation
