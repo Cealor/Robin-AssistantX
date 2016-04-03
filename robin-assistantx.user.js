@@ -5,7 +5,7 @@
 // @include     https://www.reddit.com/robin*
 // @version     1.8
 // @author      LeoVerto, Wiiplay123, Getnamo, K2L8M11N2, Cealor, vartan
-// @updateURL   https://github.com/Cealor/Robin-AssistantX/raw/master/robin-assistant.user.js
+// @updateURL   https://github.com/Cealor/Robin-AssistantX/raw/master/robin-assistantx.user.js
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @grant   GM_getValue
 // @grant   GM_setValue
