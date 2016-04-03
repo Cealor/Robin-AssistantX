@@ -3,14 +3,14 @@
 // @description Growth in peace
 // @namespace   com.github.Cealor
 // @include     https://www.reddit.com/robin*
-// @version     1.4
-// @author      LeoVerto, Wiiplay123, Getnamo, K2L8M11N2, Cealor
+// @version     1.8
+// @author      LeoVerto, Wiiplay123, Getnamo, K2L8M11N2, Cealor, vartan
 // @updateURL   https://github.com/Cealor/Robin-AssistantX/raw/master/robin-assistant.user.js
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @grant   GM_getValue
 // @grant   GM_setValue
 // ==/UserScript==
-var version = "1.4";
+var version = "1.8";
 var autoVote = true;
 var disableVoteMsgs = true;
 var filterSpam = true;
@@ -49,11 +49,11 @@ $("#settingContent").append('<div class="robin-chat--vote" style="font-weight: b
 $("#closeBtn").on("click", closeSettings);
 
 function saveSetting(settings) {
-    localStorage["robin-grow-settings"] = JSON.stringify(settings);
+    localStorage["robinassistantx-settings"] = JSON.stringify(settings);
 }
 
 function loadSetting() {
-    var setting = localStorage["robin-grow-settings"];
+    var setting = localStorage["robinassistantx-settings"];
     if (setting) {
         setting = JSON.parse(setting);
 } else {
@@ -94,17 +94,145 @@ function addInputSetting(name, description, defaultSetting) {
 }
 
 // Options begin
+addBoolSetting("filterChannel", "Filter by channel", false); 
+addInputSetting("channel", "Channel filter", "");
 //addBoolSetting("autoVote", "Automatically vote for grow", true);
 //addBoolSetting("filterSpam", "Filter known spam", true);
 //addBoolSetting("disableVoteMsgs", "Filter Vote messages", true);
 //addBoolSetting("filterNonAscii", "Filter after blacklist", true);
 
-addInputSetting("channel", "Channel filter", "");
+
+
 
 // Options end
 $("#settingContent").append('<div class="robin-chat--sidebar-widget robin-chat--report" style="text-align:center;"><a target="_blank" href="https://github.com/Cealor/Robin-AssistantX">Robin-AssistantX - Version ' + version + '</a></div>');
 
 
+function filterMessages() {
+
+    $(".robin--user-class--user").filter(function(num, message) {
+        var text = $(message).find(".robin-message--message").text();
+
+        if (settings["removeSpam"] && (text.indexOf("[") === 0 ||
+                                       text == "voted to STAY" ||
+                                       text == "voted to GROW" ||
+                                       text == "voted to ABANDON" ||
+                                       text.indexOf("Autovoter") > -1 ||
+                                       (/[\u0080-\uFFFF]/.test(text)))) {
+
+            return true;
+        }
+
+        if(settings['filterChannel'] &&
+           String(settings['channel']).length > 0 &&
+           !hasChannel($(message).find(".robin-message--message").text(), settings['channel'])) {
+            return true;
+        }
+
+        return false;
+
+    }).remove();
+
+}
+
+
+function isBotSpam(text) {
+    // starts with a [, has "Autovoter", or is a vote
+    var filter = text.indexOf("[") === 0 ||
+        text == "voted to STAY" ||
+        text == "voted to GROW" ||
+        text == "voted to ABANDON" ||
+        text.indexOf("Autovoter") > -1 ||
+        /* Detects unicode spam - Credit to travelton
+             * https://gist.github.com/travelton */
+        (/[\u0080-\uFFFF]/.test(text));
+
+    // if(filter)console.log("removing "+text);
+    return filter;
+}
+
+// Individual mute button /u/verox-
+var targetNodes = $("#robinChatMessageList");
+var myObserver = new MutationObserver(mutationHandler);
+// XXX Shou: we should only need to watch childList, more can slow it down.
+var obsConfig = {
+    childList: true
+};
+var mutedList = [];
+
+$(".robin--username").click(function() {
+    var clickedUser = mutedList.indexOf($(this).text());
+
+    if (clickedUser == -1) {
+        // Mute our user.
+        mutedList.push($(this).text());
+        $(this).css("text-decoration", "line-through");
+    } else {
+        // Unmute our user.
+        $(this).css("text-decoration", "none");
+        mutedList.splice(clickedUser, 1);
+    }
+});
+
+//--- Add a target node to the observer. Can only add one node at a time.
+targetNodes.each(function() {
+    myObserver.observe(this, obsConfig);
+});
+
+function mutationHandler(mutationRecords) {
+    mutationRecords.forEach(function(mutation) {
+        findAndHideSpam();
+        var jq = $(mutation.addedNodes);
+        var $messageUser = $(jq[0] && jq[0].children && jq[0].children[1]);
+        var $messageText = $(jq[0] && jq[0].children && jq[0].children[2]);
+        console.log("Mutation.");
+        // There are nodes added
+        if (jq.length > 0) {
+            // Mute user
+            console.log("Have message");
+            // cool we have a message.
+            var thisUser = $messageUser.text();
+            var message = $messageText.text();
+            console.log(thisUser);
+            // Check if the user is muted.
+            if (mutedList.indexOf(thisUser) >= 0 || isBotSpam(message)) {
+                // He is, hide the message.
+                $(jq[0]).remove();
+            } else {
+                // He isn't register an EH to mute the user on name-click.
+                $messageUser.click(function() {
+                    // Check the user actually wants to mute this person.
+                    if (confirm('You are about to mute ' + $(this).text() + ". Press OK to confirm.")) {
+                        // Mute our user.
+                        mutedList.push($(this).text());
+                        $(this).css("text-decoration", "line-through");
+                        $(this).hide();
+                    }
+
+                    // Output currently muted people in the console for debuggery.
+                    // console.log(mutedList);
+                });
+
+            }
+
+            // He isn't register an EH to mute the user on name-click.
+            $(jq[0].children[1]).click(function() {
+                // Check the user actually wants to mute this person.
+                if (confirm('You are about to mute ' + $(this).text() + ". Press OK to confirm.")) {
+                    // Mute our user.
+                    mutedList.push($(this).text());
+                    $(this).css("text-decoration", "line-through");
+                    $(this).remove();
+                }
+
+                // Output currently muted people in the console for debuggery.
+                // console.log(mutedList);
+            });
+
+            filterMessages();
+        }
+    });
+}
 
 
 
@@ -223,7 +351,7 @@ var spamBlacklist = ["spam the most used",
   "cool ppl list", "can't beat me", "smexy", "my ruler", "bean",
   "current standings", "numbers & tits", "numbers and tits", "nigglets",
   "voting will end",
-];
+]
 
 var nonEnglishSpamRegex = "[^\x00-\x7F]+";
 
@@ -255,7 +383,7 @@ function addOptions() {
   var autoVoteOption = createCheckbox("auto-vote",
     "Automatically vote Grow", autoVote, autoVoteListener, false);
 
-  var filters = "<b style=\"font-size: 13px;\">Filters</b>"
+  var filters = "<br><b style=\"font-size: 13px;\">Filters</b>"
 
   var filterVotesOption = createCheckbox("filter-votes",
     "Vote Messages", disableVoteMsgs, disableVoteMsgsListener, true);
@@ -384,6 +512,46 @@ function updateCounter(id, value) {
   $("#" + id).text(value);
 }
 
+
+
+
+function openSettings() {
+    $(".robin-chat--sidebar").hide();
+    $("#settingContainer").show();
+}
+$("#openBtn").on("click", openSettings);
+
+function closeSettings() {
+    $(".robin-chat--sidebar").show();
+    $("#settingContainer").hide();
+}
+
+function saveSetting(settings) {
+    localStorage["robinassistantx-settings"] = JSON.stringify(settings);
+}
+
+function loadSetting() {
+    var setting = localStorage["robinassistantx-settings"];
+    if(setting) {
+        setting = JSON.parse(setting);
+    } else {
+        setting = {};
+    }
+    return setting;
+}
+
+var settings = loadSetting();
+
+function addBoolSetting(name, description, defaultSetting) {
+    $("#settingContent").append('<div id="robinDesktopNotifier" class="robin-chat--sidebar-widget robin-chat--notification-widget"><label><input type="checkbox" name="setting-' + name + '">' + description + '</label></div>');
+    $("input[name='setting-" + name + "']").prop("checked", defaultSetting)
+        .on("click", function() {
+        settings[name] = !settings[name];
+        saveSetting(settings);
+    });
+    settings[name] = defaultSetting;
+}
+
 // Spam Filter
 function checkSpam(message) {
   // Check for 6 or more repetitions of the same character
@@ -474,7 +642,7 @@ function updateVotes() {
       $('#robinVoteWidget .robin--vote-class--continue .robin-chat--vote-label').html('stay<br>(' + votes.stay + ')');
       $(".usercount").html('' + userCount + ' users in chat');
       $(".timeleft").html('' + howLongLeft() + '');
-      $(".nextround").append(nextAction);
+      $(".nextround").html('Next round we will ' + votes.action + '');
       //<br><span style=\"font-size: 14px;\">Users here: <span id=\"user-count\">0</span></span>
       //<br><span style=\"font-size: 14px;\">Time Left: <span id=\"time-left\">0</span></span>
       
@@ -521,6 +689,7 @@ var observer = new MutationObserver(function(mutations) {
       if (filterSpam) {
         if (checkSpam(msgText)) {
           $(msg).remove();
+          filterMessages();
         }
       }
     }
@@ -552,12 +721,17 @@ setTimeout(function() {
   }
 }, 10000);
 
+setInterval(function() {
+    filterMessages();
+}, 1);
+
 // Update every 3 seconds
 setInterval(function() {
   update();
-  // Update votes at least every 5 seconds
-  if (Date.now - votesLastUpdated > 5000) {
+  // Update votes at least every 30 seconds
+  if (Date.now - votesLastUpdated > 30000) {
     updateVotes();
+    filterMessages();
   }
 }, 3000);
 
@@ -569,4 +743,4 @@ setInterval(function() {
       jQuery("#joinRobin").click();
     }, 1000);
   }
-}, 30000);
+}, 60000);
