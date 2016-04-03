@@ -3,14 +3,13 @@ Robin Enhancement Suite is a neat userscript for [reddit robin](https://www.redd
 
 ## Features
 
-* **Advanced Spam filter**
-* Automatically vote for growth
+* **Advanced, configurable Spam filter**
+* Automatically vote for growth or stay
 * Single-User mute
-* Configuration options for everything!
-* **Chat and user list use the entire available site height**
+* **Displays user count, tally and current vote outcome**
+* **Chat with Channel Filter**
+* Chat and user list use the entire available site height
 * Highlight messages containing your name (thanks to /u/rlemon, who made [this](https://gist.github.com/rlemon/cc13cb4c31861e5d5ba2a92bfc920aeb) great script)
-* Displays user count, tally and current vote outcome
-* Filter all messages containing non-ASCII characters
 * **Automatically try to rejoin, if kicked out of robin (again, thanks to /u/rlemon)**
 
 
@@ -24,8 +23,9 @@ Opera has built-in userscript support
 Next open this [raw url](https://github.com/Cealor/Robin-Enhancement-Suite/raw/master/robin-es.user.js) of the script and you should get an installation popup.
 
 # Changelog
-    1.8  Advanced Spam filter added
-    1.5  UX Updated
+    1.9: Increased updating time, incorporated Caps filter by /gardner
+    1.8: Advanced Spam filter added
+    1.5: UX Updated
     1.3: First stage merging with /Cealor/robin-script complete
     1.2: Initial updates
     1.1: Initial fork
